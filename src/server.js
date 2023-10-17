@@ -1,7 +1,6 @@
 import http from "http";
 import express from "express";
 import WebSocket from "ws";
-import { parse } from "path";
 
 const app = express();
 

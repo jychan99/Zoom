@@ -7,9 +7,7 @@ function handleOpen(){
     console.log("Connected to Server ✅");
 }
 function handleMessage(message){
-    const li = document.createElement("li");
-    li.innerText = message.data;
-    messageList.append(li);
+
 }
 function handleClose(){
     console.log("Disonnected to Server ❌");
@@ -17,7 +15,10 @@ function handleClose(){
 function handleSubmit(event){
     event.preventDefault();
     const input = messageForm.querySelector("input");
-    socket.send(makeMessage("new_message",input.value)); 
+    socket.send(makeMessage("new_message",input.value));
+    const li = document.createElement("li");
+    li.innerText = `You: ${input.value}`;
+    messageList.append(li);
     input.value=""; 
 }
 function handleNickSubmit(event){
