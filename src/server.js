@@ -20,6 +20,7 @@ wsServer.on("connection",(socket) => {
     socket.on("enter_room", (roomName,enter) => {
         socket.join(roomName);
         enter();
+        socket.to(roomName).emit("welcome");
     });
 });
 
