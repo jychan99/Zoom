@@ -14,13 +14,15 @@ const httpServer = http.createServer(app);
 const wsServer = socketIO(httpServer);
 
 wsServer.on("connection", (socket) => {
-  socket.on("join_room", (roonName, startMedia) => {
+  socket.on("join_room", (roonName) => {
     socket.join(roonName);
-    startMedia();
     socket.to(roonName).emit("welcome");
   });
   socket.on("offer", (offer, roomName) => {
     socket.to(roomName).emit("offer", offer);
+  });
+  socket.emit("answer", (answer, roomName) => {
+    socket.to(roomName).emit("answer", answer);
   });
 });
 
