@@ -1,6 +1,7 @@
 const socket = io();
 
 const myFace = document.getElementById("myFace");
+const peerFace = document.getElementById("peerFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const cameraSelect = document.getElementById("cameraSelect");
@@ -72,6 +73,14 @@ async function initCall() {
 //RTC
 function makeConnection() {
   myPeerConnection = new RTCPeerConnection();
+  myPeerConnection.addEventListener("icecandidate", (data) => {
+    console.log("send candidate");
+    socket.emit("ice", data.candidate, roomName);
+  });
+  myPeerConnection.addEventListener("addstream", (data) => {
+    console.log("peer's Stream", data.stream);
+    peerFace.srcObject = data.stream;
+  });
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));
@@ -86,14 +95,22 @@ socket.on("welcome", async () => {
 });
 
 socket.on("offer", async (offer) => {
+  console.log("received the offer");
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
-  myPeerConnection.setLocalDescription(offer);
+  myPeerConnection.setLocalDescription(answer);
   socket.emit("answer", answer, roomName);
+  console.log("send the answer");
 });
 
 socket.on("answer", (answer) => {
-  myPeerConnection.setLocalDescription(answer);
+  console.log("received the answer");
+  myPeerConnection.setRemoteDescription(answer);
+});
+
+socket.on("ice", (ice) => {
+  console.log("received candidate");
+  myPeerConnection.addIceCandidate(ice);
 });
 
 //eventListener
