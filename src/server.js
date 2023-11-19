@@ -19,6 +19,9 @@ wsServer.on("connection", (socket) => {
     startMedia();
     socket.to(roonName).emit("welcome");
   });
+  socket.on("offer", (offer, roomName) => {
+    socket.to(roomName).emit("offer", offer);
+  });
 });
 
 const handleListen = () => console.log(`Listening on http://localhost:3000`);

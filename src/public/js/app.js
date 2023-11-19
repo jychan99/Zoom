@@ -11,7 +11,8 @@ const call = document.getElementById("call");
 let myStream;
 let muted = false;
 let cameraOff = false;
-let roonName = "";
+let roomName;
+let myPeerConnection;
 
 call.hidden = true;
 
@@ -61,15 +62,31 @@ async function getMedia(deviceId) {
   }
 }
 
-function startMedia() {
+async function startMedia() {
   welcome.hidden = true;
   call.hidden = false;
-  getMedia();
+  await getMedia();
+  makeConnection();
+}
+
+//RTC
+function makeConnection() {
+  myPeerConnection = new RTCPeerConnection();
+  myStream
+    .getTracks()
+    .forEach((track) => myPeerConnection.addTrack(track, myStream));
 }
 
 //Socket.on
-socket.on("welcome", () => {
-  console.log("someone joined!");
+socket.on("welcome", async () => {
+  const offer = await myPeerConnection.createOffer();
+  myPeerConnection.setLocalDescription(offer);
+  console.log("send the offer");
+  socket.emit("offer", offer, roomName);
+});
+
+socket.on("offer", (offer) => {
+  console.log(offer);
 });
 
 //eventListener
@@ -107,6 +124,6 @@ welcomeForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const input = welcomeForm.querySelector("input");
   socket.emit("join_room", input.value, startMedia);
-  roonName = input.value;
+  roomName = input.value;
   input.value = "";
 });
